@@ -24,7 +24,14 @@ class ProductController {
     }
 
     async index(req, res) {
-        Product.find({}, (err, products) => {
+        const filters = {}
+        if (req.query.name) {
+            filters.name = req.query.name
+        }
+        if (req.query.due) {
+            filters.due = parseISO(req.query.due)
+        }
+        Product.find(filters, (err, products) => {
             res.json(products)
         }).catch(err => {
             res.json([{}])
