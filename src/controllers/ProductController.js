@@ -1,4 +1,4 @@
-import { parseISO } from 'date-fns'
+import { parseISO, format } from 'date-fns'
 import mongoose from 'mongoose'
 import '../models/Product'
 const Product = mongoose.model('products')
@@ -26,7 +26,7 @@ class ProductController {
     async index(req, res) {
         const filters = {}
         if (req.query.name) {
-            filters.name = req.query.name
+            filters.name = { $regex: '.*' + req.query.name + '.*' }
         }
         if (req.query.due) {
             filters.due = parseISO(req.query.due)
@@ -50,6 +50,16 @@ class ProductController {
                 product.save()
                 return res.json({ success: true })
             }
+        }).catch(err => {
+            return res.json({ errors: { product: 'Produto não encontrado' } })
+        })
+    }
+
+    async remove(req, res) {
+        Product.findById(req.params.id, (err, product) => {
+            Product.remove({ _id: req.params.id }).then(err => {
+                return res.json({ success: true })
+            })
         }).catch(err => {
             return res.json({ errors: { product: 'Produto não encontrado' } })
         })
