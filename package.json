@@ -5,6 +5,7 @@
   "author": "valdjr",
   "license": "MIT",
   "scripts": {
+    "star": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
