@@ -24,6 +24,20 @@ class ProductController {
     }
 
     async index(req, res) {
+        console.log('aaaaa')
+        Product.findById(req.params.id, (err, product) => {
+            if (err) {
+                return res.json({
+                    errors: { product: 'Produto não encontrado' },
+                })
+            }
+            res.json(product)
+        }).catch(err => {
+            return res.json({ errors: { product: 'Produto não encontrado' } })
+        })
+    }
+
+    async list(req, res) {
         const filters = {}
         if (req.query.name) {
             filters.name = { $regex: '.*' + req.query.name + '.*' }
@@ -32,14 +46,29 @@ class ProductController {
             filters.due = parseISO(req.query.due)
         }
         Product.find(filters, (err, products) => {
+            if (err) {
+                return res.json({
+                    errors: { product: 'Produto não encontrado' },
+                })
+            }
             res.json(products)
         }).catch(err => {
-            res.json([{}])
+            return res.json({ errors: { product: 'Produto não encontrado' } })
         })
     }
 
     async update(req, res) {
+        if (!req.body.name || !req.body.due) {
+            return res.json({
+                errors: { product: 'Dados insuficientes' },
+            })
+        }
         Product.findById(req.params.id, (err, product) => {
+            if (err) {
+                return res.json({
+                    errors: { product: 'Produto não encontrado' },
+                })
+            }
             const { name, due } = req.body
             const errors = validateProduct(name, due)
             if (errors.length > 0) {
@@ -57,7 +86,12 @@ class ProductController {
 
     async remove(req, res) {
         Product.findById(req.params.id, (err, product) => {
-            Product.remove({ _id: req.params.id }).then(err => {
+            if (err) {
+                return res.json({
+                    errors: { product: 'Produto não encontrado' },
+                })
+            }
+            Product.deleteOne({ _id: req.params.id }).then(err => {
                 return res.json({ success: true })
             })
         }).catch(err => {
